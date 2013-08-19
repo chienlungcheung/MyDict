@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <time.h>
 /*
  * use the ascii set
  */
@@ -78,7 +78,7 @@ InsertDict(TrieNode *root, char *word, char *inter) {
 TrieNode *
 CreateDict() {
 	FILE *fp = NULL;
-	char word[200], inter[200];
+	char word[300], inter[300];
 	size_t wordNumber = 0;
 	/*
 	 * 创建字典树根节点。
@@ -100,16 +100,19 @@ CreateDict() {
 	/*
 	 * 读取原始文件，单词放到word数组中，对应的中文意思放到inter数组中。
 	 */
-	while (fscanf(fp, "%s%s", word, inter) != EOF) {
+	while (fgets(word, sizeof(word), fp) && fgets(inter, sizeof(word), fp)) {
 
 		/*
 		 * 插入到字典中。
 		 */
+		word[strlen(word) - 1] = '\0';
+		inter[strlen(inter) - 1] = '\0';
+		//printf("%s	%s\n", word, inter);
 		wordNumber++;
 		InsertDict(root, word, inter);
 	}
-
-	printf("*******Total number of words is %u.******\n", wordNumber);
+	fclose(fp);
+	printf("*****Total number of words is %u.*****\n", wordNumber);
 	return root;
 }
 
@@ -173,10 +176,16 @@ TestAndTolower(char *word) {
 }
 int
 main(int argc, char *argv[]) {
-	TrieNode *dict = CreateDict();
 	char query[200];
+	TrieNode *dict;
 
-	printf("***Input --quit for quiting.***\n");
+	struct timeval start, end;
+	gettimeofday(&start, NULL);
+	dict = CreateDict();
+	gettimeofday(&end, NULL);
+
+	printf("*****建立词典耗时 %.4f s.*****\n", 1.0 * (1000000 * (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)) / 1000000);	
+	printf("*****Input --quit for quiting.*****\n");
 	do {
 		printf(">>>>>>>");
 		scanf("%s", query);
